@@ -110,7 +110,7 @@ const CONFIG = {
   devServer: {
     contentBase: path.join(__dirname, "src"),
     compress: true,
-    port: 3001,
+    port: 3000,
     hot: true,
     watchContentBase: true,
     noInfo: true,
