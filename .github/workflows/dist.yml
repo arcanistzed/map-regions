@@ -15,5 +15,10 @@ jobs:
     - run: npm install
     - name: publish
       run: |
-        git pull
-        git subtree push --prefix dist origin gh-pages --force
+        cd dist
+        git init
+        git add .
+        git commit -am "deploy"
+        git push --force git@github.com:arcanistzed/map-regions.git gh-pages
+        rm -rf .git
+        cd ..
