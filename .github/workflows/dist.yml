@@ -16,5 +16,5 @@ jobs:
     - name: publish
       run: |
         git pull
-        git reset --hard origin/branch-name
+        git reset --hard origin/main
         git subtree push --prefix dist origin gh-pages
