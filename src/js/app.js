@@ -130,6 +130,17 @@ var prototypefabric = new function () {
             }
             canvas.renderAll();
         });
+        
+        canvas.on('mouse:wheel', options => {
+            var delta = options.e.deltaY;
+            var zoom = canvas.getZoom();
+            zoom *= 0.999 ** delta;
+            if (zoom > 20) zoom = 20;
+            if (zoom < 0.01) zoom = 0.01;
+            canvas.setZoom(zoom);
+            options.e.preventDefault();
+            options.e.stopPropagation();
+        });
     };
 };
 
