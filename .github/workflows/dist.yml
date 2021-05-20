@@ -14,4 +14,6 @@ jobs:
         node-version: '14'
     - run: npm install
     - name: publish
-      run: git subtree push --prefix dist origin gh-pages
+      run: |
+        git checkout
+        git subtree push --prefix dist origin gh-pages
