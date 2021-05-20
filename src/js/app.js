@@ -22,32 +22,54 @@ $(window).load(() => {
         })
     });
 
-    // delete polygon
+    // keycodes
     $('html').keydown(e => {
         if (e.keyCode === 46 || e.keyCode === 8) {
-            while (canvas.getActiveObjects().length > 0) {
-                canvas.remove(canvas.getActiveObject()); // remove if there is only one object
-                canvas.remove(canvas.getActiveObjects()[0]); // remove if there is multiple objects
-            }
+            funcDel()
+        } else if (e.keyCode === 78) {
+            funcPoly();
+        } else if (e.keyCode === 80) {
+            funcPrefix();
+        } else if (e.keyCode === 73) {
+            funcIncrement();
         }
     });
 
     // init drawing
-    $('#new').click(() => {
+    function funcPoly() {
         prototypefabric.polygon.drawPolygon();
+    };
+    $('#new').click(() => {
+        funcPoly()
     });
 
-    $('#set-prefix').click(() => {
+    // delete polygon
+    function funcDel() {
+        while (canvas.getActiveObjects().length > 0) {
+            canvas.remove(canvas.getActiveObject()); // remove if there is only one object
+            canvas.remove(canvas.getActiveObjects()[0]); // remove if there is multiple objects
+        }
+    }
+
+    // prefix
+    function funcPrefix() {
         prefix = window.prompt("Input an area label prefix (e.g. 'A'):");
+    };
+    $('#set-prefix').click(() => {
+        funcPrefix()
     });
 
-    $('#set-increment').click(() => {
+    // increment
+    function funcIncrement() {
         increment = parseInt(window.prompt("Input a value to incrementate by (e.g. '1' or '-1'):"));
         startValue = parseInt(window.prompt("Input an integer start value (e.g. '5'):"));
+    };
+    $('#set-increment').click(() => {
+        funcIncrement(0);
     });
 
     // export JSON for 5eTools
-    $("#export").click(() => {
+    function funcExport() {
         var area = ""
         var exportData = {
             "mapRegions": []
@@ -70,6 +92,10 @@ $(window).load(() => {
             exportData.mapRegions[i].area = allJSON[i].objects[1].text
         };
         window.prompt("Copy this to your clipboard", JSON.stringify(exportData))
+
+    }
+    $("#export").click(() => {
+        funcExport();
     });
 });
 
@@ -179,8 +205,8 @@ prototypefabric.polygon = {
             var polygon = new fabric.Polygon(polyPoint, {
                 stroke: '#337ab7',
                 strokeWidth: 2,
-                fill: '#337ab760',
-                opacity: 0.5,
+                fill: '#337ab7',
+                opacity: 0.4,
                 selectable: false,
                 hasBorders: false,
                 hasControls: false,
