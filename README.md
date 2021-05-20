@@ -4,7 +4,7 @@ A tool to create the JSON for Map Regions for use on [5eTools](https://5e.tools)
 
 # Usage
 
-* Install (see below) or visit the [GitHub pages](https://arcanistzed.github.io/map-regions/dist/index.html)
+* Install (see below) or visit the [GitHub pages](https://arcanistzed.github.io/map-regions)
 * Enter URL for map image in the textbox
 * Start creating your first region by clicking to create points
 * Once you've finished, enter the area name in the prompt
