@@ -15,6 +15,8 @@ jobs:
     - run: npm install
     - name: publish
       run: |
+        git config --local user.email "tip@gha"
+        git config --local user.name "GHA"
         cd dist
         git init
         git add .
