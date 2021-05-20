@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Project</title>
+  <title>Map Regions</title>
   <meta name="author" content="arcanist">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.4.0/fabric.min.js"
@@ -17,40 +17,27 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
 
-<body onload="loadImage()">
+<body>
 
-  <nav class="grey darken-4" role="navigation" id="nav-bar">
+  <nav class="grey darken-4" role="navigation" id="nav-bar" style="position: fixed; z-index:100">
     <div class="nav-wrapper grey darken-4">
       <ul class="row">
-        <li class="col s2"><a id="create-polygon">Create Polygon</a></li>
+        <li class="col s1"><a id="new">New</a></li>
         <li class="col s1"><a id="export">Export</a></li>
         <li class="col s1"><a id="set-prefix">Prefix</a></li>
-        <li class="col s2"><a id="set-increment">Increment</a></li>
-        <div class="col s6 input-field inline">
-          <input id="urlField" type="text" placeholder="Image URL" class="grey darken-2" onchange="loadImage($(urlField).val())"/>
+        <li class="col s1"><a id="set-increment">Increment</a></li>
+        <div class="col s8 input-field inline">
+          <input id="urlField" type="text" placeholder="Image URL" class="grey darken-2" />
         </div>
       </ul>
     </div>
   </nav>
-  <div class="row">
+  <div class="row" style="top: 64px; position: absolute;">
     <div class="section no-pad-bot no-pad-top">
       <canvas id="c">
       </canvas>
     </div>
   </div>
-
-  <script type="text/javascript" src="./js/app.js"></script>
-  <script>
-    function loadImage(url) {
-      jQuery.getScript("./js/app.js", () => {
-        fabric.Image.fromURL(url, img => {
-          canvas.setWidth(img.width);
-          canvas.setHeight(img.height);
-          canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {});
-        });
-      });
-    }
-  </script>
 
 </body>
 

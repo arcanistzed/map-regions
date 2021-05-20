@@ -13,8 +13,27 @@ var startValue = null;
 $(window).load(() => {
     prototypefabric.initCanvas();
 
+    // insert background image
+    $("#urlField").change(() => {
+        fabric.Image.fromURL($("#urlField").val(), img => {
+            canvas.setWidth(img.width);
+            canvas.setHeight(img.height);
+            canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {});
+        })
+    });
+
+    // delete polygon
+    $('html').keydown(e => {
+        if (e.keyCode === 46 || e.keyCode === 8) {
+            while (canvas.getActiveObjects().length > 0) {
+                canvas.remove(canvas.getActiveObject()); // remove if there is only one object
+                canvas.remove(canvas.getActiveObjects()[0]); // remove if there is multiple objects
+            }
+        }
+    });
+
     // init drawing
-    $('#create-polygon').click(() => {
+    $('#new').click(() => {
         prototypefabric.polygon.drawPolygon();
     });
 
@@ -23,8 +42,8 @@ $(window).load(() => {
     });
 
     $('#set-increment').click(() => {
-        increment = window.prompt("Input a value to incrementate by (e.g. '1' or '-1'):");
-        startValue = window.prompt("Input an integer start value (e.g. '5'):");
+        increment = parseInt(window.prompt("Input a value to incrementate by (e.g. '1' or '-1'):"));
+        startValue = parseInt(window.prompt("Input an integer start value (e.g. '5'):"));
     });
 
     // export JSON for 5eTools
@@ -210,7 +229,7 @@ prototypefabric.polygon = {
             area = prefix + window.prompt("What area is this?");
         } else {
             area = prefix + startValue;
-            startValue = startValue + increment
+            startValue = startValue + parseInt(increment);
         };
 
         // draw in middle

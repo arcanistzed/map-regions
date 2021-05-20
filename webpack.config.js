@@ -46,17 +46,6 @@ const CONFIG = {
     new OptimizeCssAssetsPlugin({
       cssProcessorOptions: { discardComments: { removeAll: true } },
     }),
-    new CopyWebpackPlugin([
-      {
-        from: "src/images/",
-        to: "images/",
-      },
-      {
-        from: "src/*.txt",
-        to: "./[name].[ext]",
-        toType: "template",
-      },
-    ]),
     new ImageminPlugin({
       disable: devMode,
       test: /\.(jpe?g|png|gif|svg)$/i,
