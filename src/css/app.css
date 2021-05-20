@@ -1,8 +1,16 @@
 * {
-    font-family: "Roboto", sans-serif;
-    font-weight: 100;
-  }
-  
-  body {
-    overflow: hidden;
-  }
+  font-family: "Roboto", sans-serif;
+  font-weight: 100;
+}
+
+body {
+  overflow: hidden;
+}
+
+#nav-bar {
+  height: 5em;
+}
+
+#create-polygon, input-field {
+  vertical-align: middle;
+}

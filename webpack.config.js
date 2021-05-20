@@ -15,7 +15,7 @@ const CONFIG = {
   mode: process.env.NODE_ENV,
   devtool: "cheap-module-source-map",
   output: {
-    path: path.resolve(__dirname, "./build"),
+    path: path.resolve(__dirname, "./dist"),
     filename: "app.js",
   },
   plugins: [
@@ -31,7 +31,7 @@ const CONFIG = {
     new HtmlReplaceWebpackPlugin([
       {
         pattern:
-          '<script type="text/javascript" src="../build/app.js"></script>',
+          '<script type="text/javascript" src="../dist/app.js"></script>',
         replacement: "",
       },
       {
