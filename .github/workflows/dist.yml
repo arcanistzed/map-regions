@@ -15,5 +15,5 @@ jobs:
     - run: npm install
     - name: publish
       run: |
-        git checkout
+        git pull
         git subtree push --prefix dist origin gh-pages
