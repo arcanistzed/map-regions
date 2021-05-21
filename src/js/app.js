@@ -13,10 +13,11 @@ var roundedX;
 var roundedY;
 var grid = 15;
 var gridSnapping = false;
+var clickDrag = false;
+var isDown = false
+var rect, origX, origY;
 
 $(window).load(() => {
-    prototypefabric.initCanvas();
-
     // insert background image
     $("#urlField").change(() => {
         fabric.Image.fromURL($("#urlField").val(), img => {
@@ -24,6 +25,7 @@ $(window).load(() => {
             canvas.setHeight(img.height);
             canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {});
         })
+        prototypefabric.initCanvas();
     });
 
     $('html').keydown(e => {
@@ -37,12 +39,16 @@ $(window).load(() => {
             funcIncrement();
         } else if (e.keyCode === 16) {
             gridSnapping = true;
+        } else if (e.keyCode === 17) {
+            clickDrag = true;
         }
     });
 
     $('html').keyup(e => {
         if (e.keyCode === 16) {
             gridSnapping = false;
+        } else if (e.keyCode === 17) {
+            clickDrag = false;
         }
     });
 
@@ -88,16 +94,32 @@ $(window).load(() => {
 
         var allJSON = canvas.toJSON().objects
 
+        console.log(allJSON)
+
         for (var i = 0; i < allJSON.length; i++) {
             exportData.mapRegions.push({
                 "area": area,
                 "points": []
             })
 
-            // get polygon points
-            allJSON[i].objects[0].points.forEach(point => {
-                exportData.mapRegions[i].points.push([point.x, point.y])
-            })
+            // check if polygon or rect
+            if (allJSON[i]?.objects[0]?.points) {
+
+                // get polygon points
+                allJSON[i].objects[0].points.forEach(point => {
+                    exportData.mapRegions[i].points.push([point.x, point.y])
+                })
+            } else {
+
+                // get rect corners as points
+                var rectObj = allJSON[i].objects[0]
+                exportData.mapRegions[i].points.push(
+                    [rectObj.left, rectObj.top],
+                    [rectObj.left, rectObj.top + rectObj.height],
+                    [rectObj.left + rectObj.width, rectObj.height],
+                    [rectObj.left + rectObj.width, rectObj.top]
+                )
+            }
 
             // get area label
             exportData.mapRegions[i].area = allJSON[i].objects[1].text
@@ -116,11 +138,45 @@ var prototypefabric = new function () {
         canvas.selection = false;
 
         canvas.on('mouse:down', options => {
-            if (options.target && options.target.id == pointArray[0].id) {
-                prototypefabric.polygon.generatePolygon(pointArray);
+
+            var pointer = canvas.getPointer(options.e);
+            if (gridSnapping === true) {
+                roundedX = Math.ceil(pointer.x / grid) * grid
+                roundedY = Math.ceil(pointer.y / grid) * grid
+            } else {
+                roundedX = pointer.x
+                roundedY = pointer.y
             }
-            if (polygonMode) {
-                prototypefabric.polygon.addPoint(options);
+
+            if (clickDrag === true && isDown === false) {
+                isDown = true;
+                origX = roundedX;
+                origY = roundedY;
+                pointer = canvas.getPointer(options.e);
+                rect = new fabric.Rect({
+                    left: origX,
+                    top: origY,
+                    originX: 'left',
+                    originY: 'top',
+                    width: pointer.x - origX,
+                    height: pointer.y - origY,
+                    angle: 0,
+                    stroke: '#337ab7',
+                    strokeWidth: 2,
+                    fill: '#337ab7',
+                    opacity: 0.2,
+                    selectable: true,
+                    hasControls: true
+                });
+
+                canvas.add(rect);
+            } else {
+                if (options.target && options.target.id == pointArray[0].id) {
+                    prototypefabric.polygon.generatePolygon(pointArray);
+                }
+                if (polygonMode) {
+                    prototypefabric.polygon.addPoint(options);
+                }
             }
         });
 
@@ -134,20 +190,38 @@ var prototypefabric = new function () {
                 roundedX = pointer.x
                 roundedY = pointer.y
             }
-            if (activeLine && activeLine.class == "line") {
-                activeLine.set({ x2: roundedX, y2: roundedY });
 
-                var points = activeShape.get("points");
-                points[pointArray.length] = {
-                    x: roundedX,
-                    y: roundedY
+            if (clickDrag === true && isDown === true) {
+                var pointer = canvas.getPointer(options.e);
+
+                if (origX > pointer.x) {
+                    rect.set({ left: Math.abs(pointer.x) });
                 }
-                activeShape.set({
-                    points: points
-                });
+                if (origY > pointer.y) {
+                    rect.set({ top: Math.abs(pointer.y) });
+                }
+
+                rect.set({ width: Math.abs(origX - pointer.x) });
+                rect.set({ height: Math.abs(origY - pointer.y) });
+
+                canvas.renderAll();
+
+            } else {
+                if (activeLine && activeLine.class == "line") {
+                    activeLine.set({ x2: roundedX, y2: roundedY });
+
+                    var points = activeShape.get("points");
+                    points[pointArray.length] = {
+                        x: roundedX,
+                        y: roundedY
+                    }
+                    activeShape.set({
+                        points: points
+                    });
+                    canvas.renderAll();
+                }
                 canvas.renderAll();
             }
-            canvas.renderAll();
         });
 
         canvas.on('object:moving', options => {
@@ -168,6 +242,31 @@ var prototypefabric = new function () {
             canvas.setZoom(zoom);
             options.e.preventDefault();
             options.e.stopPropagation();
+        });
+
+        canvas.on('mouse:up', options => {
+            if (clickDrag === true && isDown === true) {
+                // prompt for area label if increment is not set
+                var area;
+                if (increment === 0) {
+                    area = prefix + window.prompt("What area is this?");
+                } else {
+                    area = prefix + startValue;
+                    startValue = startValue + parseInt(increment);
+                };
+
+                // draw in middle
+                var label = new fabric.Text(area, {
+                    left: rect.left + rect.width / 2,
+                    top: rect.top + rect.height / 2
+                });
+
+                // group and render
+                var group = new fabric.Group([rect, label], {})
+                canvas.add(group);
+
+                isDown = false;
+            };
         });
     };
 };
@@ -213,6 +312,8 @@ prototypefabric.polygon = {
             })
         }
         var points = [(roundedX / canvas.getZoom()), (roundedY / canvas.getZoom()), (roundedX / canvas.getZoom()), (roundedY / canvas.getZoom())];
+        console.table(points)
+        console.log({"roundedX": roundedX, "roundedY": roundedY, "getZoom": canvas.getZoom()})
         var line = new fabric.Line(points, {
             strokeWidth: 2,
             fill: '#999999',
