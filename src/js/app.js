@@ -9,6 +9,10 @@ var canvas;
 var prefix = "";
 var increment = 0;
 var startValue = null;
+var roundedX;
+var roundedY;
+var grid = 15;
+var gridSnapping = false;
 
 $(window).load(() => {
     prototypefabric.initCanvas();
@@ -22,7 +26,6 @@ $(window).load(() => {
         })
     });
 
-    // keycodes
     $('html').keydown(e => {
         if (e.keyCode === 46 || e.keyCode === 8) {
             funcDel()
@@ -32,6 +35,14 @@ $(window).load(() => {
             funcPrefix();
         } else if (e.keyCode === 73) {
             funcIncrement();
+        } else if (e.keyCode === 16) {
+            gridSnapping = true;
+        }
+    });
+
+    $('html').keyup(e => {
+        if (e.keyCode === 16) {
+            gridSnapping = false;
         }
     });
 
@@ -114,14 +125,22 @@ var prototypefabric = new function () {
         });
 
         canvas.on('mouse:move', options => {
+            var pointer = canvas.getPointer(options.e);
+
+            if (gridSnapping === true) {
+                roundedX = Math.ceil(pointer.x / grid) * grid
+                roundedY = Math.ceil(pointer.y / grid) * grid
+            } else {
+                roundedX = pointer.x
+                roundedY = pointer.y
+            }
             if (activeLine && activeLine.class == "line") {
-                var pointer = canvas.getPointer(options.e);
-                activeLine.set({ x2: pointer.x, y2: pointer.y });
+                activeLine.set({ x2: roundedX, y2: roundedY });
 
                 var points = activeShape.get("points");
                 points[pointArray.length] = {
-                    x: pointer.x,
-                    y: pointer.y
+                    x: roundedX,
+                    y: roundedY
                 }
                 activeShape.set({
                     points: points
@@ -130,7 +149,16 @@ var prototypefabric = new function () {
             }
             canvas.renderAll();
         });
-        
+
+        canvas.on('object:moving', options => {
+            if (gridSnapping === true) {
+                options.target.set({
+                    left: Math.round(options.target.left / grid) * grid,
+                    top: Math.round(options.target.top / grid) * grid
+                });
+            }
+        });
+
         canvas.on('mouse:wheel', options => {
             var delta = options.e.deltaY;
             var zoom = canvas.getZoom();
@@ -152,6 +180,16 @@ prototypefabric.polygon = {
         activeLine;
     },
     addPoint: options => {
+        var pointer = canvas.getPointer(options.e);
+
+        if (gridSnapping === true) {
+            roundedX = Math.ceil(options.e.layerX / grid) * grid;
+            roundedY = Math.ceil(options.e.layerY / grid) * grid;
+        } else {
+            roundedX = pointer.x
+            roundedY = pointer.y
+        }
+
         var random = Math.floor(Math.random() * (max - min + 1)) + min;
         var id = new Date().getTime() + random;
         var circle = new fabric.Circle({
@@ -159,8 +197,8 @@ prototypefabric.polygon = {
             fill: '#ffffff',
             stroke: '#333333',
             strokeWidth: 0.5,
-            left: (options.e.layerX / canvas.getZoom()),
-            top: (options.e.layerY / canvas.getZoom()),
+            left: (roundedX / canvas.getZoom()),
+            top: (roundedY / canvas.getZoom()),
             selectable: false,
             hasBorders: false,
             hasControls: false,
@@ -174,7 +212,7 @@ prototypefabric.polygon = {
                 fill: 'red'
             })
         }
-        var points = [(options.e.layerX / canvas.getZoom()), (options.e.layerY / canvas.getZoom()), (options.e.layerX / canvas.getZoom()), (options.e.layerY / canvas.getZoom())];
+        var points = [(roundedX / canvas.getZoom()), (roundedY / canvas.getZoom()), (roundedX / canvas.getZoom()), (roundedY / canvas.getZoom())];
         var line = new fabric.Line(points, {
             strokeWidth: 2,
             fill: '#999999',
@@ -189,11 +227,10 @@ prototypefabric.polygon = {
             objectCaching: false
         });
         if (activeShape) {
-            var pos = canvas.getPointer(options.e);
             var points = activeShape.get("points");
             points.push({
-                x: pos.x,
-                y: pos.y
+                x: roundedX,
+                y: roundedY
             });
             var polygon = new fabric.Polygon(points, {
                 stroke: '#333333',
@@ -212,7 +249,7 @@ prototypefabric.polygon = {
             canvas.renderAll();
         }
         else {
-            var polyPoint = [{ x: (options.e.layerX / canvas.getZoom()), y: (options.e.layerY / canvas.getZoom()) }];
+            var polyPoint = [{ x: (roundedX / canvas.getZoom()), y: (roundedY / canvas.getZoom()) }];
             var polygon = new fabric.Polygon(polyPoint, {
                 stroke: '#337ab7',
                 strokeWidth: 2,
