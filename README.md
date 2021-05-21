@@ -22,3 +22,8 @@ A tool to create the JSON for Map Regions for use on [5eTools](https://5e.tools)
 * Navigate to the directory that you cloned it in
 * Type `npm install` to install dependencies
 * Type `npm start` to start a local webserver or `npm run build` to build
+
+
+# Todo
+* add curves/circles
+* configuration option for grid
