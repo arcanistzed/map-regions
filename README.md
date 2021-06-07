@@ -1,6 +1,6 @@
 # Map Regions
 
-A tool to create the JSON for Map Regions for use on [5eTools](https://5e.tools).
+A tool to create the JSON of Map Regions.
 
 # Usage
 
